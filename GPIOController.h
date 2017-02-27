@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <thread>
+#include <atomic>
 #include <map>
 
 enum class PIN_DIRECTION{
@@ -18,18 +21,25 @@ enum class PIN_VALUE{
 class GPIOController
 {
 public:
-    GPIOController(std::string path) : sysGpioDir(path) {}
+    GPIOController(std::string path) : sysGpioDir(path) , period(1000) , stopPWM(true) {}
     ~GPIOController();
     int initializeGPIO(uint gpioNum, PIN_DIRECTION dir, PIN_VALUE val);
-    int setPinValue(uint n, PIN_VALUE val);
+    int setPinValue(PIN_VALUE val);
+    void softPwmSetDC(uint dutyCycle_);
+    void softPwmStart();
+    void softPwmStop();
 private:
     std::string sysGpioDir;
-    std::vector<uint> pins; //check if pin is init
+    uint pin;
 
-    int exportGPIO(uint n);
-    int unexportGPIO(uint n);
-    int setDirection(uint n, PIN_DIRECTION dir);
-    int setValue(uint n, PIN_VALUE val);
+    std::atomic_int dutyCycle; //%
+    std::atomic_int period;    // 1000msec (freq 1kHz)
+    std::atomic_bool stopPWM;
+    std::thread t;
+    int exportGPIO();
+    int unexportGPIO();
+    int setDirection(PIN_DIRECTION dir);
+    int setValue(PIN_VALUE val);
 };
 
 #endif // GPIOCONTROLLER_H

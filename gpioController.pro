@@ -8,3 +8,5 @@ SOURCES += main.cpp \
 
 HEADERS += \
     GPIOController.h
+
+LIBS += -lpthread
